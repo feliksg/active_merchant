@@ -758,6 +758,7 @@ module ActiveMerchant #:nodoc:
 
         if payment_profile[:payment]
           xml.tag!('payment') do
+            add_opaque_data(xml, payment_profile[:payment][:opaque_data]) if payment_profile[:payment].has_key?(:opaque_data)
             add_credit_card(xml, payment_profile[:payment][:credit_card]) if payment_profile[:payment].has_key?(:credit_card)
             add_bank_account(xml, payment_profile[:payment][:bank_account]) if payment_profile[:payment].has_key?(:bank_account)
             add_drivers_license(xml, payment_profile[:payment][:drivers_license]) if payment_profile[:payment].has_key?(:drivers_license)
@@ -832,6 +833,17 @@ module ActiveMerchant #:nodoc:
           # The full name of the individual associated
           # with the bank account number (optional)
           xml.tag!('bankName', bank_account[:bank_name]) if bank_account[:bank_name]
+        end
+      end
+
+      # Adds customer’s payment information from accept.js
+      # Note: This element should only be included
+      # when the payment method is opaque data.
+      def add_opaque_data(xml, opaque_data)
+        return unless opaque_data
+        xml.tag!('opaqueData') do
+          xml.tag!('dataDescriptor', opaque_data.data_descriptor)
+          xml.tag!('dataValue', expdate(opaque_data.payment_data))
         end
       end
 
