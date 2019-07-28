@@ -192,14 +192,6 @@ module ActiveMerchant
         end
       end
 
-      def store_opaque_data(opaque_data, options = {})
-        if options[:customer_profile_id]
-          create_customer_payment_profile(opaque_data, options)
-        else
-          create_customer_profile(opaque_data, options)
-        end
-      end
-
       def unstore(authorization)
         customer_profile_id, _, _ = split_authorization(authorization)
 
