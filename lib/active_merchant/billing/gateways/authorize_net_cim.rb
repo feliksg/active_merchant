@@ -843,7 +843,7 @@ module ActiveMerchant #:nodoc:
         return unless opaque_data
         xml.tag!('opaqueData') do
           xml.tag!('dataDescriptor', opaque_data.data_descriptor)
-          xml.tag!('dataValue', expdate(opaque_data.payment_data))
+          xml.tag!('dataValue', opaque_data.payment_data)
         end
       end
 
