@@ -192,6 +192,14 @@ module ActiveMerchant
         end
       end
 
+      def store_opaque_data(opaque_data, options = {})
+        if options[:customer_profile_id]
+          create_customer_payment_profile(opaque_data, options)
+        else
+          create_customer_profile(opaque_data, options)
+        end
+      end
+
       def unstore(authorization)
         customer_profile_id, _, _ = split_authorization(authorization)
 
@@ -718,10 +726,17 @@ module ActiveMerchant
           xml.paymentProfile do
             add_billing_address(xml, credit_card, options)
             xml.payment do
-              xml.creditCard do
-                xml.cardNumber(truncate(credit_card.number, 16))
-                xml.expirationDate(format(credit_card.year, :four_digits) + '-' + format(credit_card.month, :two_digits))
-                xml.cardCode(credit_card.verification_value) if credit_card.verification_value
+              if credit_card.is_a?( ::ActiveMerchant::Billing::OpaqueDataPaymentToken )
+                xml.opaqueData do
+                  xml.dataDescriptor(credit_card.data_descriptor)
+                  xml.dataValue(credit_card.payment_data)
+                end
+              else
+                xml.creditCard do
+                  xml.cardNumber(truncate(credit_card.number, 16))
+                  xml.expirationDate(format(credit_card.year, :four_digits) + '-' + format(credit_card.month, :two_digits))
+                  xml.cardCode(credit_card.verification_value) if credit_card.verification_value
+                end
               end
             end
           end
@@ -740,10 +755,17 @@ module ActiveMerchant
               add_billing_address(xml, credit_card, options)
               add_shipping_address(xml, options, 'shipToList')
               xml.payment do
-                xml.creditCard do
-                  xml.cardNumber(truncate(credit_card.number, 16))
-                  xml.expirationDate(format(credit_card.year, :four_digits) + '-' + format(credit_card.month, :two_digits))
-                  xml.cardCode(credit_card.verification_value) if credit_card.verification_value
+                if credit_card.is_a?( ::ActiveMerchant::Billing::OpaqueDataPaymentToken )
+                  xml.opaqueData do
+                    xml.dataDescriptor(credit_card.data_descriptor)
+                    xml.dataValue(credit_card.payment_data)
+                  end
+                else
+                  xml.creditCard do
+                    xml.cardNumber(truncate(credit_card.number, 16))
+                    xml.expirationDate(format(credit_card.year, :four_digits) + '-' + format(credit_card.month, :two_digits))
+                    xml.cardCode(credit_card.verification_value) if credit_card.verification_value
+                  end
                 end
               end
             end
